@@ -6,11 +6,11 @@
 > ⚠️ **Note:** The ready-to-run binary (`.exe`) will be published in the Releases section between the Banzuke announcement (April 27) and the start of the Natsu Basho (May 10). Currently, only the source code is available for manual building.
 
 
-[RU (Русский)](#russian-версия) | [EN (English)](#english-version)
+[RU (Русский)](#русская-версия) | [EN (English)](#english-version)
 
 ---
 
-## Russian Версия
+## Русская Версия
 
 Легкий и быстрый Twitch-бот для фанатов сумо. Позволяет зрителям узнавать статистику рикиши, историю встреч и информацию о предстоящих поединках прямо в чате. 
 
