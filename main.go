@@ -16,12 +16,17 @@ func main() {
 
 	bot := newBot()
 
-	msgChan := make(chan twitch.PrivateMessage, 10)
+	msgChan := make(chan twitch.PrivateMessage, 100)
 
-	go bot.handleLoop(msgChan)
+	for range 15 {
+		go bot.handleLoop(msgChan)
+	}
 
 	bot.client.OnPrivateMessage(func(msg twitch.PrivateMessage) {
-		msgChan <- msg
+		select {
+		case msgChan <- msg:
+		default:
+		}
 	})
 
 	bot.client.OnConnect(func() {

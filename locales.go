@@ -37,6 +37,8 @@ type response struct {
 	ErrBashoEnd        string
 	ErrNoScheduleYet   string
 	ErrNoBoutMakuuchi  string
+	ModOnlyOn          string
+	ModOnlyOff         string
 	NeedTranslit       bool
 }
 
@@ -67,6 +69,8 @@ var ruResp = response{
 	ErrBashoEnd:        "турнир уже завершен",
 	ErrNoScheduleYet:   "расписание на этот день еще не опубликовано",
 	ErrNoBoutMakuuchi:  "борец сегодня не выступает в Макуути",
+	ModOnlyOn:          `включен режим "только для модераторов"`,
+	ModOnlyOff:         `режим "только для модераторов" выключен. Команды доступны всем.`,
 	NeedTranslit:       true,
 }
 
@@ -97,5 +101,7 @@ var enResp = response{
 	ErrBashoEnd:        "the tournament has already concluded",
 	ErrNoScheduleYet:   "schedule for this day is not available yet",
 	ErrNoBoutMakuuchi:  "the rikishi is not competing in Makuuchi today",
+	ModOnlyOn:          `"moderators only" mode activated.`,
+	ModOnlyOff:         `"moderators only" mode deactivated. All users can now use commands`,
 	NeedTranslit:       false,
 }

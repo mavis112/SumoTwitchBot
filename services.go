@@ -9,6 +9,9 @@ import (
 	"time"
 )
 
+type rikishiUtil struct {
+	Records []*rikishi `json:"records"`
+}
 type rikishi struct {
 	ID          int       `json:"id"`
 	ShikonaEn   string    `json:"shikonaEn"`
@@ -84,9 +87,13 @@ func getHighestRank(id int, httpClient *http.Client) string {
 		return ""
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return ""
+	}
+	limitBody := http.MaxBytesReader(nil, resp.Body, 5<<20)
 	var data []rikishiRank
-	err = json.NewDecoder(resp.Body).Decode(&data)
-	if resp.StatusCode != 200 || err != nil {
+	err = json.NewDecoder(limitBody).Decode(&data)
+	if err != nil {
 		return ""
 	}
 	minValue := 9999
@@ -110,10 +117,14 @@ func getStatsById(id int, httpClient *http.Client) (*statsById, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	var data statsById
-	err = json.NewDecoder(resp.Body).Decode(&data)
-	if resp.StatusCode != 200 || err != nil {
+	if resp.StatusCode != http.StatusOK {
 		return nil, errors.New("not found")
+	}
+	limitBody := http.MaxBytesReader(nil, resp.Body, 5<<20)
+	var data statsById
+	err = json.NewDecoder(limitBody).Decode(&data)
+	if err != nil {
+		return nil, err
 	}
 	return &data, nil
 }
@@ -125,32 +136,51 @@ func getMatchupById(id1, id2 int, httpClient *http.Client) (*matchUp, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	var data matchUp
-	err = json.NewDecoder(resp.Body).Decode(&data)
-	if resp.StatusCode != 200 || err != nil {
+	if resp.StatusCode != http.StatusOK {
 		return nil, errors.New("not found")
+	}
+
+	limitBody := http.MaxBytesReader(nil, resp.Body, 5<<20)
+	var data matchUp
+	err = json.NewDecoder(limitBody).Decode(&data)
+	if err != nil {
+		return nil, err
 	}
 	return &data, nil
 }
 
 func (b *bot) getBashoDayById(r response) (int, string) {
-	if b.currBasho != nil {
+	id := getBashoId()
+	if id == "" {
+		return 0, "even month"
+	}
+	b.mtx.RLock()
+	if b.currBasho != nil && id == b.currBasho.Date {
 		day, check := calculateDay(b.currBasho, r)
+		b.mtx.RUnlock()
 		return day, check
 	}
-	id := getBashoId()
+	b.mtx.RUnlock()
 	url := fmt.Sprintf("https://www.sumo-api.com/api/basho/%s", id)
 	resp, err := b.httpClient.Get(url)
 	if err != nil {
 		return 0, "not ok"
 	}
 	defer resp.Body.Close()
-	var data bashoTime
-	err = json.NewDecoder(resp.Body).Decode(&data)
-	if resp.StatusCode != 200 || err != nil {
+	if resp.StatusCode != http.StatusOK {
 		return 0, "not ok"
 	}
-	b.currBasho = &data
+	limitBody := http.MaxBytesReader(nil, resp.Body, 5<<20)
+	var data bashoTime
+	err = json.NewDecoder(limitBody).Decode(&data)
+	if err != nil {
+		return 0, "not ok"
+	}
+	b.mtx.Lock()
+	if b.currBasho == nil || b.currBasho.Date != id {
+		b.currBasho = &data
+	}
+	b.mtx.Unlock()
 	day, check := calculateDay(&data, r)
 	return day, check
 }
@@ -162,9 +192,13 @@ func getTorikumiByDayId(id string, day int, httpClient *http.Client, r response)
 		return torikumi{}, r.ErrTechnical
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return torikumi{}, r.ErrTechnical
+	}
+	limitbody := http.MaxBytesReader(nil, resp.Body, 5<<20)
 	var data torikumi
-	err = json.NewDecoder(resp.Body).Decode(&data)
-	if resp.StatusCode != 200 || err != nil {
+	err = json.NewDecoder(limitbody).Decode(&data)
+	if err != nil {
 		return torikumi{}, r.ErrTechnical
 	}
 	if len(data.Torikumi) == 0 {
@@ -178,9 +212,13 @@ func getSingleStat(name, user string, httpClient *http.Client, rikishisList []*r
 	if rikishi == nil {
 		return fmt.Sprintf("@%s %s", user, resp.ErrNotFoundShikona)
 	}
-	age := int(time.Since(rikishi.BirthDate).Hours() / 24 / 365.25)
+	ageStr := resp.ErrBadFormatDebut
+	if !rikishi.BirthDate.IsZero() {
+		ageStr = fmt.Sprintf("%d", int(time.Since(rikishi.BirthDate).Hours()/24/365.25))
+	}
+
 	var debut string
-	if len(rikishi.Debut) >= 6 {
+	if len(rikishi.Debut) == 6 {
 		debut = rikishi.Debut[:4] + "." + rikishi.Debut[4:]
 	} else {
 		debut = resp.ErrBadFormatDebut
@@ -206,7 +244,7 @@ func getSingleStat(name, user string, httpClient *http.Client, rikishisList []*r
 	if highRank != "" {
 		finalAnswer = finalAnswer + fmt.Sprintf("| %s: %s ", resp.HighestRank, highRank)
 	}
-	finalAnswer = finalAnswer + fmt.Sprintf("| %s: %s | %d %s / %d %s | %s: %d | %s: %s ", resp.Heya, rikishi.Heya, int(rikishi.Height), resp.Height, int(rikishi.Weight), resp.Weight, resp.Age, age, resp.Debut, debut)
+	finalAnswer = finalAnswer + fmt.Sprintf("| %s: %s | %d %s / %d %s | %s: %s | %s: %s ", resp.Heya, rikishi.Heya, int(rikishi.Height), resp.Height, int(rikishi.Weight), resp.Weight, resp.Age, ageStr, resp.Debut, debut)
 	if err == nil {
 		finalAnswer = finalAnswer + fmt.Sprintf("| %s: %d | %s: %d | %s: %d | %s: %d ", resp.Matches, stats.TotalMatches, resp.Wins, stats.TotalWins, resp.NumOfBasho, stats.Basho, resp.Yusho, stats.Yusho)
 		if stats.Yusho != 0 {
@@ -243,19 +281,23 @@ func getLastMatches(name string, user string, httpClient *http.Client, rikishisL
 		return fmt.Sprintf("@%s %s", user, r.ErrNotFoundShikona)
 	}
 	id := rikishi.ID
-	url := fmt.Sprintf("https://sumo-api.com/api/rikishi/%d/matches", id)
+	url := fmt.Sprintf("https://www.sumo-api.com/api/rikishi/%d/matches", id)
 	resp, err := httpClient.Get(url)
 	if err != nil {
 		return fmt.Sprintf("@%s %s", user, r.ErrTechnical)
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Sprintf("@%s %s", user, r.ErrTechnical)
+	}
+	limitBody := http.MaxBytesReader(nil, resp.Body, 5<<20)
 	var data matchUtil
-	err = json.NewDecoder(resp.Body).Decode(&data)
-	if resp.StatusCode != 200 || err != nil {
+	err = json.NewDecoder(limitBody).Decode(&data)
+	if err != nil {
 		return fmt.Sprintf("@%s %s", user, r.ErrTechnical)
 	}
 	if len(data.Records) == 0 {
-		return r.ErrNoRecentMatches
+		return fmt.Sprintf("@%s %s", user, r.ErrNoRecentMatches)
 	}
 	var (
 		opponent string
@@ -290,9 +332,6 @@ func getLastMatches(name string, user string, httpClient *http.Client, rikishisL
 }
 
 func (b *bot) getNextMatch(name string, user string, r response) string {
-	if b.isMonthEven {
-		return fmt.Sprintf("@%s %s", user, r.ErrNoBashoMonth)
-	}
 	rikishi := getbyShikonaEn(name, b.rikishiList)
 	if rikishi == nil {
 		return fmt.Sprintf("@%s %s", user, r.ErrNotFoundShikona)
@@ -300,10 +339,14 @@ func (b *bot) getNextMatch(name string, user string, r response) string {
 	day, check := b.getBashoDayById(r)
 
 	if check != "" {
-		if check == "not ok" {
+		switch check {
+		case "not ok":
 			return fmt.Sprintf("@%s %s", user, r.ErrTechnical)
+		case "even month":
+			return fmt.Sprintf("@%s %s", user, r.ErrNoBashoMonth)
+		default:
+			return fmt.Sprintf("@%s %s", user, check)
 		}
-		return fmt.Sprintf("@%s %s", user, check)
 	}
 	torikumi, check := getTorikumiByDayId(b.currBasho.Date, day, b.httpClient, r)
 	if check != "" {
@@ -350,16 +393,17 @@ func (b *bot) getNextMatch(name string, user string, r response) string {
 }
 
 func (b *bot) getTop5Bouts(user string, r response) string {
-	if b.isMonthEven {
-		return fmt.Sprintf("@%s %s", user, r.ErrNoBashoMonth)
-	}
 	day, check := b.getBashoDayById(r)
 
 	if check != "" {
-		if check == "not ok" {
+		switch check {
+		case "not ok":
 			return fmt.Sprintf("@%s %s", user, r.ErrTechnical)
+		case "even month":
+			return fmt.Sprintf("@%s %s", user, r.ErrNoBashoMonth)
+		default:
+			return fmt.Sprintf("@%s %s", user, check)
 		}
-		return fmt.Sprintf("@%s %s", user, check)
 	}
 	torikumi, check := getTorikumiByDayId(b.currBasho.Date, day, b.httpClient, r)
 	if check != "" {

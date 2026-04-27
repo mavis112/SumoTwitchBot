@@ -19,7 +19,7 @@ func capitalizeFirstLetter(str string) string {
 func translitShikona(name string, translitMap map[rune]string) string {
 	name = strings.ToLower(name)
 	runes := []rune(name)
-	var shikona string
+	var shikona strings.Builder
 
 	for i := 0; i < len(runes); i++ {
 		r := runes[i]
@@ -27,16 +27,19 @@ func translitShikona(name string, translitMap map[rune]string) string {
 			continue
 		}
 		if l, ok := translitMap[r]; ok {
-			shikona += l
+			shikona.WriteString(l)
 		} else {
-			shikona += string(r)
+			shikona.WriteRune(r)
 		}
 	}
 
-	return shikona
+	return shikona.String()
 }
 
 func getbyShikonaEn(name string, rikishisList []*rikishi) *rikishi {
+	if len(name) > 32 {
+		return nil
+	}
 	name = capitalizeFirstLetter(name)
 	var bestMatch *rikishi
 	var limit int
@@ -66,6 +69,9 @@ func getbyShikonaEn(name string, rikishisList []*rikishi) *rikishi {
 func getBashoId() string {
 	now := time.Now().UTC()
 	currMonth := int(now.Month())
+	if currMonth%2 == 0 {
+		return ""
+	}
 	currYear := now.Year()
 	id := fmt.Sprintf("%d%02d", currYear, currMonth)
 	return id
@@ -73,6 +79,10 @@ func getBashoId() string {
 
 func calculateDay(b *bashoTime, r response) (int, string) {
 	now := time.Now().UTC()
+
+	if b.StartDate.IsZero() {
+		return 0, r.ErrTechnical
+	}
 
 	if now.Before(b.StartDate) {
 		return 0, r.ErrBashoDontStart

@@ -14,16 +14,18 @@ type commandHandler struct {
 
 func (b *bot) registerCommands() {
 	b.commands = map[string]commandHandler{
-		"!stats":   {b.showRikishiStats, enResp},
-		"!стат":    {b.showRikishiStats, ruResp},
-		"!matchup": {b.showMatchUp, enResp},
-		"!матчап":  {b.showMatchUp, ruResp},
-		"!last":    {b.showLastMatches, enResp},
-		"!ласт":    {b.showLastMatches, ruResp},
-		"!next":    {b.showNextMatch, enResp},
-		"!след":    {b.showNextMatch, ruResp},
-		"!top5":    {b.showTop5Bouts, enResp},
-		"!топ5":    {b.showTop5Bouts, ruResp},
+		"!stats":    {b.showRikishiStats, enResp},
+		"!стат":     {b.showRikishiStats, ruResp},
+		"!matchup":  {b.showMatchUp, enResp},
+		"!матчап":   {b.showMatchUp, ruResp},
+		"!last":     {b.showLastMatches, enResp},
+		"!ласт":     {b.showLastMatches, ruResp},
+		"!next":     {b.showNextMatch, enResp},
+		"!след":     {b.showNextMatch, ruResp},
+		"!top5":     {b.showTop5Bouts, enResp},
+		"!топ5":     {b.showTop5Bouts, ruResp},
+		"!modsonly": {b.togglerModsOnlyMode, enResp},
+		"!модрежим": {b.togglerModsOnlyMode, ruResp},
 	}
 }
 
@@ -90,4 +92,29 @@ func (b *bot) showNextMatch(msg twitch.PrivateMessage, resp response) {
 func (b *bot) showTop5Bouts(msg twitch.PrivateMessage, resp response) {
 	finalAnswer := b.getTop5Bouts(msg.User.DisplayName, resp)
 	b.client.Say(b.channel, finalAnswer)
+}
+
+func (b *bot) togglerModsOnlyMode(msg twitch.PrivateMessage, resp response) {
+	if !msg.User.IsBroadcaster && !msg.User.IsMod {
+		return
+	}
+	msgSlice := strings.Fields(msg.Message)
+	if len(msgSlice) < 2 {
+		return
+	}
+	trigger := strings.ToLower(msgSlice[1])
+	var answer string
+	b.mtx.Lock()
+	switch trigger {
+	case "on", "вкл":
+		b.isModsOnly = true
+		answer = fmt.Sprintf("@%s %s", msg.User.DisplayName, resp.ModOnlyOn)
+	case "off", "выкл":
+		b.isModsOnly = false
+		answer = fmt.Sprintf("@%s %s", msg.User.DisplayName, resp.ModOnlyOff)
+	}
+	b.mtx.Unlock()
+	if answer != "" {
+		b.client.Say(b.channel, answer)
+	}
 }
