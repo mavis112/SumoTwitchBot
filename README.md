@@ -1,10 +1,5 @@
 # SumoTwitchBot
 
-> ⚠️ **Примечание:** Готовый к запуску файл (`.exe`) будет опубликован в разделе Releases в промежутке между объявлением Бандзукэ (27 апреля) и началом Нацу Басё (10 мая). Сейчас в репозитории доступен исходный код для самостоятельной сборки.
-
-
-> ⚠️ **Note:** The ready-to-run binary (`.exe`) will be published in the Releases section between the Banzuke announcement (April 27) and the start of the Natsu Basho (May 10). Currently, only the source code is available for manual building.
-
 [RU (Русский)](#русская-версия) | [EN (English)](#english-version)
 
 ---
@@ -48,7 +43,7 @@ OAUTH_TOKEN=u7823h4iu23hi4u23hi4u23h
 ```
 
 #### Как обновлять бота:
-При выходе новой версии достаточно заменить старый файл `sumobot.exe` на новый. **Не перезаписывайте** уже настроенный файл `config.env`, чтобы не потерять свои данные.
+При выходе новой версии достаточно заменить старый файл `SumoTwitchBot.exe` на новый. **Не перезаписывайте** уже настроенный файл `config.env`, чтобы не потерять свои данные.
 
 ### Защита от спама
 *   **3 секунды** кулдауна на использование команд для обычных зрителей.
@@ -64,7 +59,7 @@ OAUTH_TOKEN=u7823h4iu23hi4u23hi4u23h
 | `!матчап [имя1] [имя2]` | История личных встреч борцов. | *!матчап аби оносато* |
 | `!след [имя]` | Соперник и статистика матча **(только дивизион Макуучи)**. | *!след аонишики* |
 | `!топ5` | 5 последних поединков игрового дня **(только дивизион Макуучи)**. | *!топ5* |
-| `!модрежим вкл/выкл` | Включение/выключение режима «только для модераторов». | *!модрежим вкл* |
+| `!модрежим вкл/выкл` | Режима «только для модераторов». [Стример/Модераторы] | *!модрежим вкл* |
 
 ---
 
@@ -107,7 +102,7 @@ OAUTH_TOKEN=u7823h4iu23hi4u23hi4u23h
 ```
 
 #### How to update:
-When a new version is released, simply replace the old `sumobot.exe` with the new one. **DO NOT overwrite** your existing `config.env` file.
+When a new version is released, simply replace the old `SumoTwitchBot.exe` with the new one. **DO NOT overwrite** your existing `config.env` file.
 
 ### Spam Protection
 *   **3-second** command cooldown for regular viewers.
@@ -123,7 +118,7 @@ When a new version is released, simply replace the old `sumobot.exe` with the ne
 | `!matchup [n1] [n2]` | Head-to-head history. | *!matchup abi onosato* |
 | `!next [name]` | Next opponent & match stats **(Makuuchi only)**. | *!next kotozakura* |
 | `!top5` | The final 5 bouts of the tournament day **(Makuuchi only)**. | *!top5* |
-| `!modsonly on/off` | Toggles "Moderators Only" mode. | *!modsonly on* |
+| `!modsonly on/off` | Toggle "Moderators Only" mode. [Broadcaster/Mods] | *!modsonly on* |
 
 ---
 
