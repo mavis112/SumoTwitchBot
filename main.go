@@ -16,7 +16,7 @@ func main() {
 
 	bot := newBot()
 
-	msgChan := make(chan twitch.PrivateMessage, 100)
+	msgChan := make(chan twitch.PrivateMessage, 500)
 
 	for range 15 {
 		go bot.handleLoop(msgChan)

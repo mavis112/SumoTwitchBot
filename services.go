@@ -418,10 +418,74 @@ func (b *bot) getTop5Bouts(user string, r response) string {
 
 	for i := start; i < limit; i++ {
 		match := torikumi.Torikumi[i]
-		finalAnswer += fmt.Sprintf("%s vs %s", match.EastShikona, match.WestShikona)
+		switch {
+		case match.WinnerID == 0:
+			finalAnswer += fmt.Sprintf("%s vs %s", match.EastShikona, match.WestShikona)
+		case match.WinnerID == match.EastID:
+			finalAnswer += fmt.Sprintf("%s [W] vs %s (%s)", match.EastShikona, match.WestShikona, match.Kimarite)
+		case match.WinnerID == match.WestID:
+			finalAnswer += fmt.Sprintf("%s vs [W] %s (%s)", match.EastShikona, match.WestShikona, match.Kimarite)
+		}
 		if i != limit-1 {
 			finalAnswer += " | "
 		}
 	}
 	return finalAnswer
+}
+
+func (b *bot) getCurrentScore(name string, user string, r response) string {
+	rikishi := getbyShikonaEn(name, b.rikishiList)
+	if rikishi == nil {
+		return fmt.Sprintf("@%s %s", user, r.ErrNotFoundShikona)
+	}
+	_, check := b.getBashoDayById(r)
+
+	if check != "" {
+		switch check {
+		case "not ok":
+			return fmt.Sprintf("@%s %s", user, r.ErrTechnical)
+		case "even month":
+			return fmt.Sprintf("@%s %s", user, r.ErrNoBashoMonth)
+		default:
+			return fmt.Sprintf("@%s %s", user, check)
+		}
+	}
+
+	bashoId := b.currBasho.Date
+	id := rikishi.ID
+
+	url := fmt.Sprintf("https://www.sumo-api.com/api/rikishi/%d/matches?bashoId=%s", id, bashoId)
+	resp, err := b.httpClient.Get(url)
+	if err != nil {
+		return fmt.Sprintf("@%s %s", user, r.ErrTechnical)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Sprintf("@%s %s", user, r.ErrTechnical)
+	}
+	limitBody := http.MaxBytesReader(nil, resp.Body, 5<<20)
+	var data matchUtil
+	err = json.NewDecoder(limitBody).Decode(&data)
+	if err != nil {
+		return fmt.Sprintf("@%s %s", user, r.ErrTechnical)
+	}
+
+	if len(data.Records) == 0 {
+		return fmt.Sprintf("@%s %s %s", user, rikishi.ShikonaEn, r.ErrNoBoutsThisBasho)
+	}
+	var (
+		wins   int
+		losses int
+	)
+	for _, match := range data.Records {
+		if match.WinnerID == 0 {
+			continue
+		}
+		if match.WinnerID == id {
+			wins++
+		} else {
+			losses++
+		}
+	}
+	return fmt.Sprintf("@%s %s %d-%d", user, rikishi.ShikonaEn, wins, losses)
 }

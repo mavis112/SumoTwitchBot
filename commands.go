@@ -26,6 +26,9 @@ func (b *bot) registerCommands() {
 		"!топ5":     {b.showTop5Bouts, ruResp},
 		"!modsonly": {b.togglerModsOnlyMode, enResp},
 		"!модрежим": {b.togglerModsOnlyMode, ruResp},
+		"!score":    {b.showCurrentScore, enResp},
+		"!счёт":     {b.showCurrentScore, ruResp},
+		"!счет":     {b.showCurrentScore, ruResp},
 	}
 }
 
@@ -117,4 +120,18 @@ func (b *bot) togglerModsOnlyMode(msg twitch.PrivateMessage, resp response) {
 	if answer != "" {
 		b.client.Say(b.channel, answer)
 	}
+}
+
+func (b *bot) showCurrentScore(msg twitch.PrivateMessage, resp response) {
+	msgSlice := strings.Fields(msg.Message)
+	if len(msgSlice) < 2 {
+		b.client.Say(b.channel, fmt.Sprintf("@%s %s", msg.User.DisplayName, resp.ErrNoRikishi))
+		return
+	}
+	rikishi := msgSlice[1]
+	if resp.NeedTranslit {
+		rikishi = translitShikona(rikishi, b.translitMap)
+	}
+	finalAnswer := b.getCurrentScore(rikishi, msg.User.DisplayName, resp)
+	b.client.Say(b.channel, finalAnswer)
 }
