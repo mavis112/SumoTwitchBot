@@ -55,6 +55,7 @@ OAUTH_TOKEN=u7823h4iu23hi4u23hi4u23h
 | Команда | Описание | Пример |
 | :--- | :--- | :--- |
 | `!стат [имя]` | Ранг, хэя, рост и вес борца и др. | *!стат рога* |
+| `!счёт [имя]` | Текущий результат борца на турнире (победы-поражения). | *!счёт охо*
 | `!ласт [имя]` | Результаты 3-х последних матчей. | *!ласт шиши* |
 | `!матчап [имя1] [имя2]` | История личных встреч борцов. | *!матчап аби оносато* |
 | `!след [имя]` | Соперник и статистика матча **(только дивизион Макуучи)**. | *!след аонишики* |
@@ -114,6 +115,7 @@ When a new version is released, simply replace the old `SumoTwitchBot.exe` with 
 | Command | Description | Example |
 | :--- | :--- | :--- |
 | `!stats [name]` | Rank, heya, height, weight, etc. | *!stats asanoyama* |
+| `!score [name]` | Current tournament record (wins-losses). | *!score oho*
 | `!last [name]` | Results of the last 3 matches. | *!last hoshoryu* |
 | `!matchup [n1] [n2]` | Head-to-head history. | *!matchup abi onosato* |
 | `!next [name]` | Next opponent & match stats **(Makuuchi only)**. | *!next kotozakura* |
