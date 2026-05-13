@@ -45,8 +45,9 @@ type statsById struct {
 }
 
 type matchUp struct {
-	RikishiWins  int `json:"rikishiWins"`
-	OpponentWins int `json:"opponentWins"`
+	RikishiWins  int     `json:"rikishiWins"`
+	OpponentWins int     `json:"opponentWins"`
+	Matches      []match `json:"matches"`
 }
 
 type match struct {
@@ -272,6 +273,28 @@ func GetMatchup(name1, name2, user string, httpClient *http.Client, rikishisList
 		return fmt.Sprintf("@%s %s", user, resp.ErrNoMatchup)
 	}
 	finalAnswer := fmt.Sprintf("@%s %s %d-%d %s", user, rikishi1.ShikonaEn, stat.RikishiWins, stat.OpponentWins, rikishi2.ShikonaEn)
+	if len(stat.Matches) > 3 {
+		wins := 0
+		losses := 0
+		count := 0
+		for i := range stat.Matches {
+			if count == 3 {
+				break
+			}
+			if stat.Matches[i].WinnerID == 0 {
+				continue
+			}
+			if stat.Matches[i].WinnerID == rikishi1.ID {
+				wins++
+			} else {
+				losses++
+			}
+			count++
+		}
+		if count == 3 {
+			finalAnswer += fmt.Sprintf(" (%d-%d)", wins, losses)
+		}
+	}
 	return finalAnswer
 }
 

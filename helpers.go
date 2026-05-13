@@ -90,7 +90,7 @@ func calculateDay(b *bashoTime, r response) (int, string) {
 
 	day := int(now.Sub(b.StartDate).Hours()/24) + 1
 
-	if now.Hour() > 9 || (now.Hour() == 9 && now.Minute() > 15) {
+	if now.Hour() > 9 || (now.Hour() == 9 && now.Minute() > 5) {
 		day++
 	}
 	if day >= 16 {

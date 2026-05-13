@@ -69,7 +69,7 @@ var ruResp = response{
 	ErrBashoDontStart:   "турнир еще не начался",
 	ErrBashoEnd:         "турнир уже завершен",
 	ErrNoScheduleYet:    "расписание на этот день еще не опубликовано",
-	ErrNoBoutMakuuchi:   "борец сегодня не выступает в Макуути",
+	ErrNoBoutMakuuchi:   "борец сегодня не выступает в Макуучи",
 	ModOnlyOn:           `включен режим "только для модераторов"`,
 	ModOnlyOff:          `режим "только для модераторов" выключен. Команды доступны всем.`,
 	ErrNoBoutsThisBasho: "ещё не выступал на этом турнире",

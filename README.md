@@ -57,7 +57,7 @@ OAUTH_TOKEN=u7823h4iu23hi4u23hi4u23h
 | `!стат [имя]` | Ранг, хэя, рост и вес борца и др. | *!стат рога* |
 | `!счёт [имя]` | Текущий результат борца на турнире (победы-поражения). | *!счёт охо*
 | `!ласт [имя]` | Результаты 3-х последних матчей. | *!ласт шиши* |
-| `!матчап [имя1] [имя2]` | История личных встреч борцов. | *!матчап аби оносато* |
+| `!матчап [имя1] [имя2]` | История личных встреч борцов. В скобках — результат последних 3-х матчей. | *!матчап аби оносато* |
 | `!след [имя]` | Соперник и статистика матча **(только дивизион Макуучи)**. | *!след аонишики* |
 | `!топ5` | 5 последних поединков игрового дня **(только дивизион Макуучи)**. | *!топ5* |
 | `!модрежим вкл/выкл` | Режима «только для модераторов». [Стример/Модераторы] | *!модрежим вкл* |
@@ -117,7 +117,7 @@ When a new version is released, simply replace the old `SumoTwitchBot.exe` with 
 | `!stats [name]` | Rank, heya, height, weight, etc. | *!stats asanoyama* |
 | `!score [name]` | Current tournament record (wins-losses). | *!score oho*
 | `!last [name]` | Results of the last 3 matches. | *!last hoshoryu* |
-| `!matchup [n1] [n2]` | Head-to-head history. | *!matchup abi onosato* |
+| `!matchup [n1] [n2]` | Head-to-head history. Shows the record of the last 3 bouts in parentheses. | *!matchup abi onosato* |
 | `!next [name]` | Next opponent & match stats **(Makuuchi only)**. | *!next kotozakura* |
 | `!top5` | The final 5 bouts of the tournament day **(Makuuchi only)**. | *!top5* |
 | `!modsonly on/off` | Toggle "Moderators Only" mode. [Broadcaster/Mods] | *!modsonly on* |
